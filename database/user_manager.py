@@ -1,48 +1,103 @@
-from database.firebase_connector import db
-import random
-import string
+import sqlite3
+import os
+from datetime import datetime
 
-def create_user(email, country):
-    user_ref = db.collection('users')
-    user_id = ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-    user_ref.document(user_id).set({
-        'email': email,
-        'country': country,
-        'points': 100,  # Starting points
-        'is_premium': False,
-        'ad_views_today': 0
-    })
-    return user_id
+DB_PATH = os.path.join("database", "savely_global.db")
 
-def get_user(user_id):
-    user_ref = db.collection('users').document(user_id)
-    return user_ref.get().to_dict()
-
-def update_points(user_id, points):
-    user_ref = db.collection('users').document(user_id)
-    user_ref.update({
-        'points': firestore.Increment(points)
-    })
-
-def record_ad_view(user_id):
-    user_ref = db.collection('users').document(user_id)
-    user_ref.update({
-        'ad_views_today': firestore.Increment(1)
-    })
+def init_db():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
     
-    # Check if reached 4 ads
-    user = get_user(user_id)
-    if user['ad_views_today'] >= 4:
-        # Reset and reward
-        user_ref.update({'ad_views_today': 0})
-        reward_user(user_id)
+    # Create tables
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+                 id INTEGER PRIMARY KEY,
+                 email TEXT UNIQUE,
+                 country TEXT,
+                 signup_date DATE,
+                 last_login DATE,
+                 points INTEGER DEFAULT 0,
+                 ad_views_today INTEGER DEFAULT 0,
+                 is_premium INTEGER DEFAULT 0)''')
+    
+    c.execute('''CREATE TABLE IF NOT EXISTS recipes (
+                 id INTEGER PRIMARY KEY,
+                 title TEXT,
+                 description TEXT,
+                 ingredients TEXT,
+                 instructions TEXT,
+                 nutrition TEXT,
+                 country TEXT,
+                 sa_flavor TEXT,
+                 image_path TEXT,
+                 video_path TEXT,
+                 created_date DATE,
+                 is_premium INTEGER DEFAULT 0)''')
+    
+    c.execute('''CREATE TABLE IF NOT EXISTS ad_views (
+                 id INTEGER PRIMARY KEY,
+                 user_id INTEGER,
+                 brand TEXT,
+                 cpm REAL,
+                 view_date DATE)''')
+    
+    conn.commit()
+    conn.close()
 
-def reward_user(user_id):
-    # Give 100 points or other reward
-    update_points(user_id, 100)
+def save_recipes(recipes):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    today = datetime.now().date()
+    
+    for recipe in recipes:
+        c.execute('''INSERT INTO recipes 
+                     (title, description, ingredients, instructions, nutrition, country, sa_flavor, 
+                      image_path, video_path, created_date, is_premium)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                 (recipe['title'], 
+                  recipe['description'],
+                  json.dumps(recipe['ingredients']),
+                  json.dumps(recipe['instructions']),
+                  recipe.get('nutrition', ''),
+                  recipe['country'],
+                  recipe['sa_flavor'],
+                  recipe.get('image_path', ''),
+                  recipe.get('video_path', ''),
+                  today,
+                  0))  # Free by default
+    
+    conn.commit()
+    conn.close()
 
-def upgrade_user(user_id):
-    user_ref = db.collection('users').document(user_id)
-    user_ref.update({
-        'is_premium': True
-    })
+def get_users_for_rewards():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id FROM users WHERE points > 0")
+    users = c.fetchall()
+    conn.close()
+    return [user[0] for user in users]
+
+def record_ad_view(user_id, brand, cpm):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    today = datetime.now().date()
+    
+    # Record ad view
+    c.execute('''INSERT INTO ad_views (user_id, brand, cpm, view_date)
+                 VALUES (?, ?, ?, ?)''', (user_id, brand, cpm, today))
+    
+    # Update user's daily ad count
+    c.execute('''UPDATE users SET ad_views_today = ad_views_today + 1 
+                 WHERE id = ?''', (user_id,))
+    
+    conn.commit()
+    conn.close()
+
+def reward_user_for_ad(user_id):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    
+    # Add points
+    c.execute('''UPDATE users SET points = points + 20 WHERE id = ?''', (user_id,))
+    
+    conn.commit()
+    conn.close()
