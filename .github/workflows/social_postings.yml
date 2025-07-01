@@ -1,0 +1,29 @@
+name: Daily Social Media Posting
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # Run daily at 8 AM UTC
+
+jobs:
+  post-content:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        pip install -r web_app/requirements.txt
+        
+    - name: Run daily workflow
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        HUGGINGFACE_API_KEY: ${{ secrets.HUGGINGFACE_API_KEY }}
+        PIKA_API_KEY: ${{ secrets.PIKA_API_KEY }}
+        TIKTOK_API_KEY: ${{ secrets.TIKTOK_API_KEY }}
+      run: python scripts/daily_workflow.py
