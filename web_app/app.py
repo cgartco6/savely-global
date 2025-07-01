@@ -2,7 +2,21 @@ from flask import Flask, render_template, send_file, request
 import os
 from database.user_manager import UserManager
 from ai_agents.payment_handler import process_payment
+from ai_agents.ad_bot import serve_ad
+from database.user_manager import create_user
 
+@app.route('/ad')
+def serve_ad():
+    user_id = request.args.get('user')
+    if not user_id:
+        return {"error": "User missing"}, 400
+    
+    ad = serve_ad(user_id)
+    return jsonify(ad)
+
+@app.route('/webhook/stripe', methods=['POST'])
+def stripe_webhook():
+    return payment_handler.process_webhook(request)
 app = Flask(__name__)
 user_manager = UserManager()
 
