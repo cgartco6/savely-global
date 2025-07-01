@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ recipe.title }} - Savely Global</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .recipe-detail {
+            padding: 60px 0;
+        }
+        .recipe-detail h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #1d3557;
+        }
+        .recipe-detail img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .meta {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+        .ingredients, .instructions {
+            margin-bottom: 40px;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        .ingredients h3, .instructions h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #a8dadc;
+            padding-bottom: 10px;
+            color: #1d3557;
+        }
+        .ingredients ul, .instructions ol {
+            padding-left: 20px;
+        }
+        .ingredients li, .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+        .actions {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            display: inline-block;
+            background-color: #e63946;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+        .btn:hover {
+            background-color: #c1121f;
+            transform: translateY(-2px);
+        }
+        .btn.premium {
+            background-color: #1d3557;
+        }
+        .btn.premium:hover {
+            background-color: #14213d;
+        }
+        .nutrition {
+            background: #f1faee;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        .nutrition h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #1d3557;
+        }
+        .tags {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .tag {
+            background-color: #a8dadc;
+            color: #1d3557;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        .share-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .share-button {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .share-button:hover {
+            transform: translateY(-3px);
+            background: #e63946;
+            color: white;
+            border-color: #e63946;
+        }
+        @media (max-width: 768px) {
+            .actions {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div>
+                    <h1>Savely Global</h1>
+                    <p>Culinary Fusion Experience</p>
+                </div>
+                <nav>
+                    <a href="{{ url_for('home') }}">Home</a>
+                    <a href="{{ url_for('premium') }}">Premium</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="container recipe-detail">
+        <article>
+            <div class="breadcrumb">
+                <a href="{{ url_for('home') }}">Home</a> > Recipe
+            </div>
+            
+            <h2>{{ recipe.title }}</h2>
+            
+            <div class="meta">
+                <span>Prep Time: {{ recipe.prep_time }} mins</span>
+                <span>Cook Time: {{ recipe.cook_time }} mins</span>
+                <span>Serves: {{ recipe.serves }}</span>
+            </div>
+            
+            <img src="{{ url_for('static', filename='images/' + recipe.image_filename) }}" alt="{{ recipe.title }}">
+            
+            <div class="description">
+                <p>{{ recipe.description }}</p>
+            </div>
+            
+            <section class="ingredients">
+                <h3>Ingredients</h3>
+                <ul>
+                    {% for ingredient in recipe.ingredients %}
+                    <li>{{ ingredient }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+            
+            <section class="instructions">
+                <h3>Instructions</h3>
+                <ol>
+                    {% for step in recipe.instructions %}
+                    <li>{{ step }}</li>
+                    {% endfor %}
+                </ol>
+            </section>
+            
+            {% if recipe.nutrition %}
+            <div class="nutrition">
+                <h3>Nutrition Information</h3>
+                <p>{{ recipe.nutrition }}</p>
+            </div>
+            {% endif %}
+            
+            <div class="tags">
+                <span class="tag">{{ recipe.country }} Cuisine</span>
+                <span class="tag">South African {{ recipe.sa_flavor }}</span>
+                <span class="tag">Fusion Recipe</span>
+            </div>
+            
+            <div class="actions">
+                <a href="{{ url_for('download_recipe', recipe_id=recipe.id) }}" class="btn">
+                    Download Recipe PDF
+                </a>
+                <a href="{{ url_for('premium') }}" class="btn premium">
+                    Go Premium for More Recipes
+                </a>
+            </div>
+            
+            <div class="share-buttons">
+                <div class="share-button">
+                    <i>FB</i>
+                </div>
+                <div class="share-button">
+                    <i>TW</i>
+                </div>
+                <div class="share-button">
+                    <i>PI</i>
+                </div>
+                <div class="share-button">
+                    <i>EM</i>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <section class="ad-container">
+        <div class="container">
+            <div id="ad-space">
+                <!-- Ad will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Savely Global</h3>
+                    <p>Bringing South African flavors to the world through culinary fusion</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="{{ url_for('home') }}">Home</a></li>
+                        <li><a href="{{ url_for('premium') }}">Premium</a></li>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Savely Global. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize user ID
+            let userId = localStorage.getItem('userId');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('userId', userId);
+            }
+            
+            // Load ad
+            const adSpace = document.getElementById('ad-space');
+            if (adSpace) {
+                fetch(`/ad?user_id=${userId}`)
+                    .then(response => response.json())
+                    .then(ad => {
+                        if (ad.type === 'banner') {
+                            adSpace.innerHTML = `
+                                <a href="${ad.url}" target="_blank" class="ad-banner">
+                                    <img src="/static/ads/${ad.content}" alt="${ad.brand}">
+                                </a>
+                            `;
+                        } else if (ad.type === 'video') {
+                            adSpace.innerHTML = `
+                                <div class="video-ad">
+                                    <video controls class="ad-video">
+                                        <source src="/static/ads/${ad.content}" type="video/mp4">
+                                    </video>
+                                    <a href="${ad.url}" target="_blank">Visit ${ad.brand}</a>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading ad:', error);
+                        adSpace.innerHTML = '<p>Ad could not be loaded</p>';
+                    });
+            }
+            
+            // Track recipe view
+            const recipeId = "{{ recipe.id }}";
+            if (recipeId) {
+                fetch('/analytics/recipe-view', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        recipe_id: recipeId,
+                        user_id: userId
+                    })
+                });
+            }
+        });
+    </script>
+</body>
+</html>
