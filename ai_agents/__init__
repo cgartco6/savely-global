@@ -1,0 +1,64 @@
+import schedule
+import time
+from .recipe_generator import generate_daily_recipes
+from .image_creator import create_recipe_images
+from .video_maker import create_recipe_videos
+from .social_manager import post_to_all_platforms
+from .localization_engine import localize_content
+from .ad_bot import serve_ads, track_ad_performance
+from database.user_manager import save_recipes, get_users_for_rewards
+from config.country_settings import COUNTRIES, SA_FLAVORS
+import random
+
+def daily_workflow():
+    print("🚀 Starting daily content creation workflow")
+    
+    # Step 1: Generate recipes
+    recipes = []
+    for _ in range(3):  # Create 3 new recipes daily
+        country = random.choice(COUNTRIES)
+        sa_flavor = random.choice(SA_FLAVORS)
+        recipe = generate_daily_recipes(country, sa_flavor)
+        recipes.append(recipe)
+    
+    # Step 2: Create visual content
+    for recipe in recipes:
+        recipe['image_path'] = create_recipe_images(recipe['title'])
+        recipe['video_path'] = create_recipe_videos(recipe['image_path'], recipe['description'][:100])
+    
+    # Step 3: Localize content
+    localized_recipes = []
+    for recipe in recipes:
+        localized = localize_content(recipe, target_lang='auto')  # Auto detects country language
+        localized_recipes.append(localized)
+    
+    # Step 4: Save to database
+    save_recipes(localized_recipes)
+    print(f"💾 Saved {len(localized_recipes)} recipes to database")
+    
+    # Step 5: Post to social media
+    for recipe in localized_recipes:
+        post_to_all_platforms(recipe, recipe['video_path'])
+    
+    # Step 6: Serve ads and track performance
+    serve_ads()
+    track_ad_performance()
+    
+    # Step 7: Reward users
+    reward_users()
+    
+    print("✅ Daily workflow completed successfully")
+
+def reward_users():
+    users = get_users_for_rewards()
+    print(f"🎁 Rewarding {len(users)} users")
+    # Implementation would update user points in database
+
+# Schedule daily workflow at 4 AM UTC
+schedule.every().day.at("04:00").do(daily_workflow)
+
+if __name__ == '__main__':
+    print("🤖 Savely Global AI Agent System Started")
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
