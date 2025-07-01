@@ -1,0 +1,11 @@
+# API Keys Configuration
+OPENAI_API_KEY = "your_openai_api_key"
+HUGGINGFACE_API_KEY = "your_huggingface_api_key"
+PIKA_API_KEY = "your_pika_api_key"
+ELEVENLABS_API_KEY = "your_elevenlabs_api_key"
+TIKTOK_API_KEY = "your_tiktok_api_key"
+INSTAGRAM_API_KEY = "your_instagram_api_key"
+FACEBOOK_API_KEY = "your_facebook_api_key"
+STRIPE_API_KEY = "your_stripe_api_key"
+COINBASE_API_KEY = "your_coinbase_api_key"
+AD_SERVER_API_KEY = "your_ad_server_api_key"
