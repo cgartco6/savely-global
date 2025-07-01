@@ -1,54 +1,48 @@
-from flask import Flask, render_template, send_file, request
+from flask import Flask, render_template, request, jsonify, send_file
+from database.user_manager import init_db
+from ai_agents.ad_bot import get_ad_for_user
 import os
-from database.user_manager import UserManager
-from ai_agents.payment_handler import process_payment
-from ai_agents.ad_bot import serve_ad
-from database.user_manager import create_user
 
-@app.route('/ad')
-def serve_ad():
-    user_id = request.args.get('user')
-    if not user_id:
-        return {"error": "User missing"}, 400
-    
-    ad = serve_ad(user_id)
-    return jsonify(ad)
-
-@app.route('/webhook/stripe', methods=['POST'])
-def stripe_webhook():
-    return payment_handler.process_webhook(request)
 app = Flask(__name__)
-user_manager = UserManager()
+
+# Initialize database
+init_db()
 
 @app.route('/')
 def home():
-    return render_template('index.html', 
-                          recipes=user_manager.get_free_recipes())
+    return render_template('index.html')
 
-@app.route('/recipe/<recipe_id>')
+@app.route('/recipe/<int:recipe_id>')
 def recipe_page(recipe_id):
-    recipe = user_manager.get_recipe(recipe_id)
+    # Would fetch recipe from database
+    recipe = {
+        "title": "Sample Fusion Recipe",
+        "description": "Delicious cultural fusion",
+        "ingredients": ["Ingredient 1", "Ingredient 2"],
+        "instructions": ["Step 1", "Step 2"]
+    }
     return render_template('recipe.html', recipe=recipe)
 
-@app.route('/download/<recipe_id>')
-def download_recipe(recipe_id):
-    recipe = user_manager.get_recipe(recipe_id)
-    return send_file(recipe['pdf_path'], as_attachment=True)
-
-@app.route('/premium', methods=['GET', 'POST'])
+@app.route('/premium')
 def premium():
-    if request.method == 'POST':
-        country = request.form['country']
-        currency = request.form['currency']
-        if process_payment(country, currency):
-            return render_template('premium.html', 
-                                  success=True,
-                                  recipes=user_manager.get_premium_recipes())
-    return render_template('premium.html', countries=get_countries())
+    return render_template('premium.html')
 
-def get_countries():
-    # Return supported countries
-    return ['US', 'UK', 'DE', 'JP', 'ZA', 'AU', 'NZ']
+@app.route('/download/<int:recipe_id>')
+def download_recipe(recipe_id):
+    # Would generate PDF from recipe data
+    return send_file('sample_recipe.pdf', as_attachment=True)
+
+@app.route('/ad')
+def serve_ad():
+    user_id = request.args.get('user_id', 'default_user')
+    ad = get_ad_for_user(user_id)
+    return jsonify(ad)
+
+@app.route('/purchase-premium', methods=['POST'])
+def purchase_premium():
+    # Process payment
+    # Would integrate with Stripe/Coinbase
+    return jsonify({"status": "success", "message": "Premium access granted"})
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)
