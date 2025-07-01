@@ -5,6 +5,8 @@ COUNTRIES = [
     "Finland", "South Africa", "New Zealand"
 ]
 
+SA_FLAVORS = ["rooibos", "amarula", "biltong", "melktert"]
+
 CURRENCY_MAP = {
     "Germany": "EUR",
     "France": "EUR",
