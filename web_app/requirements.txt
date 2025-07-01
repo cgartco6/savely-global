@@ -1,0 +1,7 @@
+flask
+openai
+requests
+Pillow
+schedule
+python-dotenv
+sqlite3
