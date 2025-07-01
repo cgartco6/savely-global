@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Savely Global</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <h1>Global Fusion Recipes</h1>
+    
+    <div class="recipes">
+        {% for recipe in recipes %}
+        <div class="recipe-card">
+            <h2>{{ recipe.title }}</h2>
+            <img src="{{ recipe.image_url }}" alt="{{ recipe.title }}">
+            <a href="/recipe/{{ recipe.id }}">View Recipe</a>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="ad-container">
+        <!-- Ad will be loaded here -->
+    </div>
+    
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
